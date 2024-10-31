@@ -2,8 +2,13 @@
 
 import Typography from '@/components/Typography'
 import { InputField } from '@/components/ui/inputField'
+import { TextArea } from '@/components/ui/textArea'
+import { CustomChips } from '@/components/ui/customChips'
 import { useFormikContext } from 'formik'
 import React from 'react'
+import CustomButton from '@/components/ui/customButton'
+import { imageConfig } from '@/constant/imageConfig'
+import { EmailGeneratorFormValues } from './EmailGeneratorPage'
 
 interface EmailGeneratorFormProps {
   handleSubmit: () => void
@@ -11,17 +16,13 @@ interface EmailGeneratorFormProps {
   isValid: boolean
 }
 
-const EmailGeneratorForm = ({
+const EmailGeneratorForm: React.FC<EmailGeneratorFormProps> = ({
   handleSubmit,
   isSubmitting,
   isValid,
-}: EmailGeneratorFormProps) => {
-  const { values, setFieldValue, touched, errors } = useFormikContext<{
-    fromName: string
-    toName: string
-    emailPrompt: string
-    tone: string[]
-  }>()
+}) => {
+  const { values, setFieldValue, errors, touched } =
+    useFormikContext<EmailGeneratorFormValues>()
 
   const toneOptions = [
     { label: 'Professional', value: 'professional' },
@@ -35,8 +36,17 @@ const EmailGeneratorForm = ({
     setFieldValue(field, value)
   }
 
+  const handleToneChange = (selectedTone: string) => {
+    const currentTones = values.tone
+    const newTones = currentTones.includes(selectedTone)
+      ? currentTones.filter((tone) => tone !== selectedTone)
+      : [...currentTones, selectedTone]
+
+    handleChange('tone', newTones)
+  }
+
   return (
-    <div className='mx-auto max-w-2xl space-y-6 p-6'>
+    <div className='mx-auto space-y-6 p-10'>
       <div className='space-y-4'>
         {/* From Name Field */}
         <div className='space-y-2'>
@@ -49,6 +59,9 @@ const EmailGeneratorForm = ({
             onChange={(e) => handleChange('fromName', e.target.value)}
             className='w-full'
           />
+          {errors.fromName && touched.fromName && (
+            <div className='text-red-500'>{errors.fromName}</div>
+          )}
         </div>
 
         {/* To Name Field */}
@@ -62,59 +75,62 @@ const EmailGeneratorForm = ({
             onChange={(e) => handleChange('toName', e.target.value)}
             className='w-full'
           />
+          {errors.toName && touched.toName && (
+            <div className='text-red-500'>{errors.toName}</div>
+          )}
         </div>
 
         {/* Email Prompt Field */}
         <div className='space-y-2'>
           <Typography className='font-medium'>Email Content Prompt</Typography>
-          <textarea
+          <TextArea
             id='emailPrompt'
             placeholder='Describe what you want to say in the email...'
             value={values.emailPrompt}
             onChange={(e) => handleChange('emailPrompt', e.target.value)}
-            className='min-h-[120px] w-full rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
+            variant='primaryBordered'
+            className='w-full'
           />
+          {errors.emailPrompt && touched.emailPrompt && (
+            <div className='text-red-500'>{errors.emailPrompt}</div>
+          )}
         </div>
 
-        {/* Tone Selection */}
-        <div className='space-y-2'>
+        {/* Tone Selection with CustomChips */}
+        <div>
           <Typography className='font-medium'>Email Tone</Typography>
-          <select
+          <CustomChips
             id='tone'
-            multiple
-            value={values.tone}
-            onChange={(e) => {
-              const selectedOptions = Array.from(
-                e.target.selectedOptions,
-                (option) => option.value
+            data={toneOptions.map((option) => option.label)}
+            name='tone'
+            onSelect={(name, item) =>
+              handleToneChange(
+                toneOptions.find((tone) => tone.label === item)?.value || ''
               )
-              handleChange('tone', selectedOptions)
-            }}
-            className='w-full rounded-md border p-2 focus:outline-none focus:ring-2 focus:ring-blue-500'
-          >
-            {toneOptions.map((tone) => (
-              <option
-                key={tone.value}
-                value={tone.value}
-              >
-                {tone.label}
-              </option>
-            ))}
-          </select>
-          <div className='text-sm text-gray-500'>
-            Hold Ctrl (Windows) or Command (Mac) to select multiple tones
-          </div>
+            }
+            selected={values.tone}
+          />
+          {errors.tone && touched.tone && (
+            <div className='text-red-500'>{errors.tone}</div>
+          )}
         </div>
 
         {/* Submit Button */}
-        <button
-          type='submit'
-          onClick={handleSubmit}
-          disabled={!isValid || isSubmitting}
-          className='mt-6 w-full rounded-md bg-blue-500 px-4 py-2 text-white transition-colors hover:bg-blue-600 disabled:cursor-not-allowed disabled:bg-gray-400'
-        >
-          {isSubmitting ? 'Generating...' : 'Generate Email'}
-        </button>
+        <div className='flex items-center justify-center py-8'>
+          <CustomButton
+            type='button'
+            onClick={() => {
+              if (isValid) {
+                handleSubmit()
+              }
+            }}
+            color='primary'
+            iconSrc={`${imageConfig.STARS}`}
+            disabled={!isValid || isSubmitting}
+          >
+            {isSubmitting ? 'Generating...' : 'Generate Email'}
+          </CustomButton>
+        </div>
       </div>
     </div>
   )

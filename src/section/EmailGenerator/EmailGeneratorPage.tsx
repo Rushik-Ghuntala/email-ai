@@ -4,6 +4,15 @@ import { FormikProvider, useFormik } from 'formik'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import React, { useState } from 'react'
 import EmailGeneratorForm from './EmailGeneratorForm'
+import { toFormikValidationSchema } from 'zod-formik-adapter'
+import { emailFormValidationSchema } from '@/utils/validations'
+
+export interface EmailGeneratorFormValues {
+  fromName: string
+  toName: string
+  emailPrompt: string
+  tone: string[]
+}
 
 const EmailGeneratePage = () => {
   const route = useRouter()
@@ -12,14 +21,14 @@ const EmailGeneratePage = () => {
 
   //   const [loading, setLoading] = useState(true)
 
-  const formik = useFormik<any>({
+  const formik = useFormik<EmailGeneratorFormValues>({
     initialValues: {
       fromName: '',
       toName: '',
       emailPrompt: '',
       tone: [],
     },
-    // validationSchema: toFormikValidationSchema(postCreationForm),
+    validationSchema: toFormikValidationSchema(emailFormValidationSchema),
     onSubmit: async (values) => {
       await submitForm(values)
     },
@@ -27,7 +36,7 @@ const EmailGeneratePage = () => {
     validateOnMount: true,
   })
 
-  const submitForm = async (values: any) => {
+  const submitForm = async (values: EmailGeneratorFormValues) => {
     try {
       const requestBody = {
         userName: values.fromName,
