@@ -2,10 +2,11 @@
 
 import { FormikProvider, useFormik } from 'formik'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import EmailGeneratorForm from './EmailGeneratorForm'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 import { emailFormValidationSchema } from '@/utils/validations'
+import TextEditor from '../TextEditor/TextEditor'
 
 export interface EmailGeneratorFormValues {
   fromName: string
@@ -19,7 +20,13 @@ const EmailGeneratePage = () => {
   const pathname = usePathname()
   const searchParams = useSearchParams()
 
-  //   const [loading, setLoading] = useState(true)
+  const [subject, setSubject] = useState('')
+  const [email, setEmail] = useState('')
+
+  // Convert \n to <br /> for Quill editor
+  const convertNewLinesToHtml = (text: string) => {
+    return text.replace(/\n/g, '<br />')
+  }
 
   const formik = useFormik<EmailGeneratorFormValues>({
     initialValues: {
@@ -53,88 +60,65 @@ const EmailGeneratePage = () => {
         body: JSON.stringify(requestBody),
       })
 
-      console.log('resposce: ', response)
-
       const data = await response.json()
 
-      console.log('body', data)
-
-      //   const response = await fetch(`${AI_API_ENDPOINTS.GENERATE_CONTENT}`, {
-      //     method: 'POST',
-      //     headers: {
-      //       'Content-Type': 'application/json',
-      //     },
-      //     body: JSON.stringify(requestBody),
-      //   })
-
-      //   if (!response.ok) {
-      //     const errorData = await response.json()
-      //     throw new Error(errorData?.message || 'Failed to generate content')
-      //   }
-
-      //   const data = await response.json()
-      //   formik.setFieldValue('isDirty', false)
+      if (data.email) {
+        setSubject(data.email.subject || '')
+        // Convert line breaks before setting the email content
+        setEmail(convertNewLinesToHtml(data.email.body || ''))
+      }
     } catch (error) {
       console.error('API Error:', error)
     }
   }
 
-  const {
-    values,
-    setFieldValue,
-    touched,
-    errors,
-    isValid,
-    setFieldTouched,
-    handleSubmit,
-    isSubmitting,
-  } = formik
-
-  console.log('vale', values)
-
-  const renderComponent = () => {
-    // if (loading) {
-    //   return <div>Loading...</div>
-    // }
-    // if (hasGenerationParam) {
-    //   return (
-    //     <PostGeneration
-    //       handleSubmit={handleSubmit}
-    //       generatedContent={generatedContent}
-    //       isSubmitting={isSubmitting}
-    //       isValid={isValid}
-    //     />
-    //   )
-    // } else if (hasIdParam) {
-    //   return (
-    //     <PostCreationTemplate
-    //       handleSubmit={handleSubmit}
-    //       isSubmitting={isSubmitting}
-    //       isValid={isValid}
-    //     />
-    //   )
-    // } else if (hasPostIdParam) {
-    //   return <PostView />
-    // } else {
-    //   return (
-    //     <PostCreation
-    //       handleSubmit={handleSubmit}
-    //       isSubmitting={isSubmitting}
-    //       isValid={isValid}
-    //     />
-    //   )
-    // }
+  const handleSubjectChange = (content: string) => {
+    setSubject(content)
   }
 
+  const handleEmailChange = (content: string) => {
+    setEmail(content)
+  }
+
+  const { handleSubmit, isSubmitting, isValid } = formik
+
   return (
-    <div>
-      <FormikProvider value={formik}>
-        <EmailGeneratorForm
-          handleSubmit={handleSubmit}
-          isSubmitting={isSubmitting}
-          isValid={isValid}
-        />
-      </FormikProvider>
+    <div className='flex items-start'>
+      <div className='h-screen w-1/2'>
+        <FormikProvider value={formik}>
+          <EmailGeneratorForm
+            handleSubmit={handleSubmit}
+            isSubmitting={isSubmitting}
+            isValid={isValid}
+          />
+        </FormikProvider>
+      </div>
+
+      <div className='mx-auto h-screen w-1/2 space-y-4 p-10'>
+        {/* Subject Editor */}
+        <div className='mb-4'>
+          <label className='mb-2 block text-sm font-medium text-gray-700'>
+            Subject
+          </label>
+          <TextEditor
+            value={subject}
+            onChange={handleSubjectChange}
+            toolbarId='toolbar-subject'
+          />
+        </div>
+
+        {/* Email Body Editor */}
+        <div>
+          <label className='mb-2 block text-sm font-medium text-gray-700'>
+            Email Body
+          </label>
+          <TextEditor
+            value={email}
+            onChange={handleEmailChange}
+            toolbarId='toolbar-body'
+          />
+        </div>
+      </div>
     </div>
   )
 }
