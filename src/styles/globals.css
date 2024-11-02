@@ -36,3 +36,22 @@ body {
 .animate-spin {
   animation: spin 1s linear infinite;
 }
+
+.editor > div {
+  border: none !important;
+  font-size: 14px;
+}
+
+.no-border {
+  border-width: 0 0 0 0 !important;
+  border-color: #eaecf0;
+}
+
+/* .extra-work {
+  border-top-right-radius: 8px;
+    border-top-left-radius: 8px;
+} */
+/* .ql-toolbar .ql-snow {
+  border-top-right-radius: 8px !important;
+    border-top-left-radius: 8px !important;
+} */

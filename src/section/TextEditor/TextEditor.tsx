@@ -12,7 +12,7 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
   const isSubject = toolbarId === 'toolbar-subject'
 
   return (
-    <div className='ql-toolbar ql-snow flex items-center space-x-1 border-0 border-b border-gray-200 px-4 py-2'>
+    <div className='extra-work ql-toolbar ql-snow flex items-center space-x-1 px-4 py-2'>
       {/* Font Family Dropdown */}
       <select className='ql-font focus:outline-none'>
         <option value='sans-serif'>Sans Serif</option>
@@ -143,7 +143,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
   `
 
   return (
-    <div className='text-editor rounded-lg border border-gray-200'>
+    <div className='text-editor rounded-b-xl bg-gradient-to-r from-white to-gray-50 shadow-md ring-1 ring-[#1A73E8] transition-all duration-300 hover:bg-gradient-to-r hover:from-gray-50 hover:to-white hover:shadow-lg hover:ring-[#1A73E8] focus:ring-2 focus:ring-[#1A73E8] focus-visible:outline-none'>
       <style>{customStyles}</style>
       <div id={toolbarId}>
         <CustomToolbar toolbarId={toolbarId} />

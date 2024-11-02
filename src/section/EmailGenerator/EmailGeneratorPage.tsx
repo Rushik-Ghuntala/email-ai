@@ -6,7 +6,12 @@ import React, { useEffect, useState } from 'react'
 import EmailGeneratorForm from './EmailGeneratorForm'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 import { emailFormValidationSchema } from '@/utils/validations'
-import TextEditor from '../TextEditor/TextEditor'
+import dynamic from 'next/dynamic'
+import Typography from '@/components/Typography'
+
+const TextEditor = dynamic(() => import('../TextEditor/TextEditor'), {
+  ssr: false,
+})
 
 export interface EmailGeneratorFormValues {
   fromName: string
@@ -24,9 +29,7 @@ const EmailGeneratePage = () => {
   const [email, setEmail] = useState('')
 
   // Convert \n to <br /> for Quill editor
-  const convertNewLinesToHtml = (text: string) => {
-    return text.replace(/\n/g, '<br />')
-  }
+  const convertNewLinesToHtml = (text: string) => text.replace(/\n/g, '<br />')
 
   const formik = useFormik<EmailGeneratorFormValues>({
     initialValues: {
@@ -96,10 +99,15 @@ const EmailGeneratePage = () => {
 
       <div className='mx-auto h-screen w-1/2 space-y-4 p-10'>
         {/* Subject Editor */}
-        <div className='mb-4'>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>
-            Subject
-          </label>
+        <div className='mb-8'>
+          <Typography
+            size='xl'
+            weight='semibold'
+            className='mb-3'
+          >
+            Subject:
+          </Typography>
+
           <TextEditor
             value={subject}
             onChange={handleSubjectChange}
@@ -109,9 +117,14 @@ const EmailGeneratePage = () => {
 
         {/* Email Body Editor */}
         <div>
-          <label className='mb-2 block text-sm font-medium text-gray-700'>
-            Email Body
-          </label>
+          <Typography
+            size='xl'
+            weight='semibold'
+            className='mb-3'
+          >
+            Email Body:
+          </Typography>
+
           <TextEditor
             value={email}
             onChange={handleEmailChange}
