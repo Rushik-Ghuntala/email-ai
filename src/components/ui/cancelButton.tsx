@@ -10,7 +10,7 @@ type CustomButtonProps = ButtonProps & {
   isLoading?: boolean
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({
+const CancelButton: React.FC<CustomButtonProps> = ({
   iconSrc,
   iconAlt = 'icon',
   iconPosition = 'left',
@@ -23,18 +23,11 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     <Button
       {...props}
       disabled={disabled || isLoading}
-      className={`flex items-center rounded-full px-8 py-6 transition-opacity duration-300 ${disabled || isLoading ? 'cursor-not-allowed opacity-50' : ''} bg-gradient-to-r from-[#1A73E8] to-[#81C8FF]`}
+      className={`flex w-full items-center rounded-full px-8 py-6 transition-opacity duration-300 ${disabled || isLoading ? 'cursor-not-allowed opacity-50' : ''} bg-gradient-to-r from-white to-gray-50 ring-2 ring-[#1A73E8]`}
     >
       {isLoading ? (
-        <span className='flex items-center space-x-2'>
-          <Loader2 className='h-5 w-5 animate-spin text-white' />
-          <Typography
-            size='lg'
-            weight='semibold'
-            color='text-white'
-          >
-            {children}
-          </Typography>
+        <span className='flex items-center'>
+          <Loader2 className='h-5 w-5 animate-spin text-black' />{' '}
         </span>
       ) : (
         <>
@@ -50,7 +43,7 @@ const CustomButton: React.FC<CustomButtonProps> = ({
           <Typography
             size='lg'
             weight='semibold'
-            color='text-white'
+            color='text-black'
           >
             {children}
           </Typography>
@@ -70,4 +63,4 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   )
 }
 
-export default CustomButton
+export default CancelButton

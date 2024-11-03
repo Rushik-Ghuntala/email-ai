@@ -10,7 +10,7 @@ type CustomButtonProps = ButtonProps & {
   isLoading?: boolean
 }
 
-const CustomButton: React.FC<CustomButtonProps> = ({
+const FullButton: React.FC<CustomButtonProps> = ({
   iconSrc,
   iconAlt = 'icon',
   iconPosition = 'left',
@@ -23,7 +23,9 @@ const CustomButton: React.FC<CustomButtonProps> = ({
     <Button
       {...props}
       disabled={disabled || isLoading}
-      className={`flex items-center rounded-full px-8 py-6 transition-opacity duration-300 ${disabled || isLoading ? 'cursor-not-allowed opacity-50' : ''} bg-gradient-to-r from-[#1A73E8] to-[#81C8FF]`}
+      className={`flex w-full items-center rounded-full px-8 py-[26px] transition-opacity duration-300 ${
+        disabled || isLoading ? 'cursor-not-allowed opacity-50' : ''
+      } bg-gradient-to-r from-[#1A73E8] to-[#81C8FF]`}
     >
       {isLoading ? (
         <span className='flex items-center space-x-2'>
@@ -70,4 +72,4 @@ const CustomButton: React.FC<CustomButtonProps> = ({
   )
 }
 
-export default CustomButton
+export default FullButton

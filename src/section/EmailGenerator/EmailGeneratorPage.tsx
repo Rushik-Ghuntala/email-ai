@@ -2,13 +2,16 @@
 
 import { FormikProvider, useFormik } from 'formik'
 import { usePathname, useRouter, useSearchParams } from 'next/navigation'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import EmailGeneratorForm from './EmailGeneratorForm'
 import { toFormikValidationSchema } from 'zod-formik-adapter'
 import { emailFormValidationSchema } from '@/utils/validations'
 import dynamic from 'next/dynamic'
 import Typography from '@/components/Typography'
+import EmailForm from '@/form/EmailForm'
+import CustomButton from '@/components/ui/customButton'
 
+// Dynamic import for TextEditor
 const TextEditor = dynamic(() => import('../TextEditor/TextEditor'), {
   ssr: false,
 })
@@ -29,9 +32,23 @@ const EmailGeneratePage = () => {
   const [email, setEmail] = useState('')
   const [isSubmitted, setIsSubmitted] = useState(false)
 
-  // Convert \n to <br /> for Quill editor
+  const [emailForm, setEmailForm] = useState<{
+    onSave: () => void
+    onCancel: () => void
+  } | null>(null)
+
+  // Handles opening the email form
+  const handleInformationProfileButtonClick = () => {
+    setEmailForm({
+      onSave: () => setEmailForm(null),
+      onCancel: () => setEmailForm(null),
+    })
+  }
+
+  // Utility function to convert \n to <br /> for Quill editor
   const convertNewLinesToHtml = (text: string) => text.replace(/\n/g, '<br />')
 
+  // Formik setup
   const formik = useFormik<EmailGeneratorFormValues>({
     initialValues: {
       fromName: '',
@@ -41,51 +58,36 @@ const EmailGeneratePage = () => {
     },
     validationSchema: toFormikValidationSchema(emailFormValidationSchema),
     onSubmit: async (values) => {
-      await submitForm(values)
+      setIsSubmitted(true)
+      try {
+        const requestBody = {
+          userName: values.fromName,
+          toName: values.toName,
+          emailPrompt: values.emailPrompt,
+          tone: values.tone,
+        }
+
+        const response = await fetch('/api/emailGenerating', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(requestBody),
+        })
+
+        const data = await response.json()
+
+        if (data.email) {
+          setSubject(data.email.subject || '')
+          setEmail(convertNewLinesToHtml(data.email.body || ''))
+        }
+      } catch (error) {
+        console.error('API Error:', error)
+      } finally {
+        setIsSubmitted(false)
+      }
     },
     enableReinitialize: true,
     validateOnMount: true,
   })
-
-  const submitForm = async (values: EmailGeneratorFormValues) => {
-    setIsSubmitted(true)
-    try {
-      const requestBody = {
-        userName: values.fromName,
-        toName: values.toName,
-        emailPrompt: values.emailPrompt,
-        tone: values.tone,
-      }
-
-      const response = await fetch('/api/emailGenerating', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(requestBody),
-      })
-
-      const data = await response.json()
-
-      if (data.email) {
-        setSubject(data.email.subject || '')
-        // Convert line breaks before setting the email content
-        setEmail(convertNewLinesToHtml(data.email.body || ''))
-      }
-    } catch (error) {
-      console.error('API Error:', error)
-    } finally {
-      setIsSubmitted(false)
-    }
-  }
-
-  const handleSubjectChange = (content: string) => {
-    setSubject(content)
-  }
-
-  const handleEmailChange = (content: string) => {
-    setEmail(content)
-  }
 
   const { handleSubmit, isSubmitting, isValid } = formik
 
@@ -102,7 +104,6 @@ const EmailGeneratePage = () => {
       </div>
 
       <div className='mx-auto h-screen w-1/2 space-y-4 p-10'>
-        {/* Subject Editor */}
         <div className='mb-8'>
           <Typography
             size='xl'
@@ -111,16 +112,14 @@ const EmailGeneratePage = () => {
           >
             Subject:
           </Typography>
-
           <TextEditor
             value={subject}
-            onChange={handleSubjectChange}
+            onChange={setSubject}
             toolbarId='toolbar-subject'
             isSubmitted={isSubmitted}
           />
         </div>
 
-        {/* Email Body Editor */}
         <div>
           <Typography
             size='xl'
@@ -129,15 +128,27 @@ const EmailGeneratePage = () => {
           >
             Email Body:
           </Typography>
-
           <TextEditor
             value={email}
-            onChange={handleEmailChange}
+            onChange={setEmail}
             toolbarId='toolbar-body'
             isSubmitted={isSubmitted}
           />
         </div>
+
+        <CustomButton onClick={handleInformationProfileButtonClick}>
+          Send Email
+        </CustomButton>
       </div>
+
+      {emailForm && (
+        <EmailForm
+          onSave={emailForm.onSave}
+          onCancel={emailForm.onCancel}
+          subject={subject}
+          content={email}
+        />
+      )}
     </div>
   )
 }
