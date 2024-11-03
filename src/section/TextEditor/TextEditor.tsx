@@ -1,11 +1,16 @@
-import React from 'react'
+'use client'
+
+import React, { useState, useEffect, useRef } from 'react'
 import ReactQuill from 'react-quill-new'
 import 'react-quill/dist/quill.snow.css'
+import { Loader2 } from 'lucide-react'
+import { AnimatePresence, motion, Variants } from 'framer-motion'
 
 interface TextEditorProps {
   value: string
   onChange: (value: string) => void
   toolbarId: string
+  isSubmitted: boolean
 }
 
 const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
@@ -13,7 +18,6 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
 
   return (
     <div className='extra-work ql-toolbar ql-snow flex items-center space-x-1 px-4 py-2'>
-      {/* Font Family Dropdown */}
       <select className='ql-font focus:outline-none'>
         <option value='sans-serif'>Sans Serif</option>
         <option value='serif'>Serif</option>
@@ -22,7 +26,6 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
 
       <div className='mx-2 h-5 border-l border-gray-300' />
 
-      {/* Size/Style Dropdown */}
       <select className='ql-size focus:outline-none'>
         <option value='normal'>Normal</option>
         <option value='small'>Small</option>
@@ -32,29 +35,19 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
 
       <div className='mx-2 h-5 border-l border-gray-300' />
 
-      {/* Basic Text Formatting */}
       <button className='ql-bold focus:outline-none' />
       <button className='ql-italic focus:outline-none' />
       <button className='ql-underline focus:outline-none' />
 
-      {/* Additional options only for body toolbar */}
       {!isSubject && (
         <>
           <button className='ql-strike focus:outline-none' />
 
           <div className='mx-2 h-5 border-l border-gray-300' />
 
-          {/* Text Size Controls */}
-          {/* <button className='ql-script focus:outline-none' value='super' />
-          <button className='ql-script focus:outline-none' value='sub' />
-
-          <div className='mx-2 h-5 border-l border-gray-300' /> */}
-
-          {/* Text Color Control */}
           <select className='ql-color focus:outline-none'></select>
           <div className='mx-2 h-5 border-l border-gray-300' />
 
-          {/* Text Alignment Buttons */}
           <button
             className='ql-align'
             value=''
@@ -73,7 +66,6 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
 
           <div className='mx-2 h-5 border-l border-gray-300' />
 
-          {/* Lists */}
           <button
             className='ql-list focus:outline-none'
             value='ordered'
@@ -82,12 +74,9 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
             className='ql-list focus:outline-none'
             value='bullet'
           />
-          {/* <button className='ql-indent focus:outline-none' value='-1' />
-          <button className='ql-indent focus:outline-none' value='+1' /> */}
 
           <div className='mx-2 h-5 border-l border-gray-300' />
 
-          {/* Insert Options */}
           <button className='ql-link focus:outline-none' />
           <button className='ql-image focus:outline-none' />
         </>
@@ -96,20 +85,133 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
   )
 }
 
+const alphabets = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('')
+const getRandomInt = (max: number) => Math.floor(Math.random() * max)
+
+interface HyperTextProps {
+  text: string
+  duration?: number
+  framerProps?: Variants
+  className?: string
+  animateOnLoad?: boolean
+}
+
+const HyperText: React.FC<HyperTextProps> = ({
+  text,
+  duration = 800,
+  framerProps = {
+    initial: { opacity: 0, y: -10 },
+    animate: { opacity: 1, y: 0 },
+    exit: { opacity: 0, y: 3 },
+  },
+  className,
+  animateOnLoad = true,
+}) => {
+  const [displayText, setDisplayText] = useState(text.split(''))
+  const [trigger, setTrigger] = useState(false)
+  const interations = React.useRef(0)
+  const isFirstRender = React.useRef(true)
+
+  const triggerAnimation = () => {
+    interations.current = 0
+    setTrigger(true)
+  }
+
+  useEffect(() => {
+    const interval = setInterval(
+      () => {
+        if (!animateOnLoad && isFirstRender.current) {
+          clearInterval(interval)
+          isFirstRender.current = false
+          return
+        }
+        if (interations.current < text.length) {
+          setDisplayText((t) =>
+            t.map((l, i) =>
+              l === ' '
+                ? l
+                : i <= interations.current
+                  ? text[i]
+                  : alphabets[getRandomInt(26)]
+            )
+          )
+          interations.current = interations.current + 0.1
+        } else {
+          setTrigger(false)
+          clearInterval(interval)
+        }
+      },
+      duration / (text.length * 10)
+    )
+    return () => clearInterval(interval)
+  }, [text, duration, trigger, animateOnLoad])
+
+  return (
+    <div
+      className='flex scale-100 cursor-default overflow-hidden py-2'
+      onMouseEnter={triggerAnimation}
+    >
+      <AnimatePresence mode='wait'>
+        {displayText.map((letter, i) => (
+          <motion.span
+            key={i}
+            className={`font-mono ${letter === ' ' ? 'w-3' : ''} ${className}`}
+            {...framerProps}
+          >
+            {letter.toUpperCase()}
+          </motion.span>
+        ))}
+      </AnimatePresence>
+    </div>
+  )
+}
+
 const TextEditor: React.FC<TextEditorProps> = ({
   value,
   onChange,
   toolbarId,
+  isSubmitted,
 }) => {
-  const isSubject = toolbarId === 'toolbar-subject'
+  const [displayValue, setDisplayValue] = useState('')
+  const [isAnimating, setIsAnimating] = useState(false)
+  const prevValueRef = useRef('')
+  const prevSubmittedRef = useRef(false)
+
+  useEffect(() => {
+    if (
+      isSubmitted &&
+      !prevSubmittedRef.current &&
+      value !== prevValueRef.current
+    ) {
+      setIsAnimating(true)
+      setDisplayValue('')
+      prevValueRef.current = value
+    }
+    prevSubmittedRef.current = isSubmitted
+  }, [isSubmitted, value])
+
+  useEffect(() => {
+    if (isAnimating) {
+      let currentIndex = 0
+      const animateText = () => {
+        if (currentIndex <= value.length) {
+          setDisplayValue(value.slice(0, currentIndex))
+          currentIndex++
+          setTimeout(animateText, 30)
+        } else {
+          setIsAnimating(false)
+        }
+      }
+      animateText()
+    }
+  }, [value, isAnimating])
 
   const modules = {
     toolbar: {
       container: `#${toolbarId}`,
       handlers: {
-        // Disable handlers for subject toolbar if needed
-        image: isSubject ? false : undefined,
-        link: isSubject ? false : undefined,
+        image: toolbarId === 'toolbar-subject' ? false : undefined,
+        link: toolbarId === 'toolbar-subject' ? false : undefined,
       },
     },
   }
@@ -148,13 +250,25 @@ const TextEditor: React.FC<TextEditorProps> = ({
       <div id={toolbarId}>
         <CustomToolbar toolbarId={toolbarId} />
       </div>
-      <ReactQuill
-        theme='snow'
-        value={value}
-        onChange={onChange}
-        modules={modules}
-        className='editor !border-0'
-      />
+      {isSubmitted ? (
+        <div className='flex items-center justify-center p-4'>
+          <Loader2 className='mr-2 h-4 w-4 animate-spin' />
+          <HyperText
+            text={'Generating Content...'}
+            duration={1500}
+            className='text-lg font-semibold text-gray-700'
+            animateOnLoad={true}
+          />
+        </div>
+      ) : (
+        <ReactQuill
+          theme='snow'
+          value={value}
+          onChange={onChange}
+          modules={modules}
+          className='editor !border-0'
+        />
+      )}
     </div>
   )
 }

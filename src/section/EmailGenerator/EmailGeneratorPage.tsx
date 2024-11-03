@@ -27,6 +27,7 @@ const EmailGeneratePage = () => {
 
   const [subject, setSubject] = useState('')
   const [email, setEmail] = useState('')
+  const [isSubmitted, setIsSubmitted] = useState(false)
 
   // Convert \n to <br /> for Quill editor
   const convertNewLinesToHtml = (text: string) => text.replace(/\n/g, '<br />')
@@ -47,6 +48,7 @@ const EmailGeneratePage = () => {
   })
 
   const submitForm = async (values: EmailGeneratorFormValues) => {
+    setIsSubmitted(true)
     try {
       const requestBody = {
         userName: values.fromName,
@@ -72,6 +74,8 @@ const EmailGeneratePage = () => {
       }
     } catch (error) {
       console.error('API Error:', error)
+    } finally {
+      setIsSubmitted(false)
     }
   }
 
@@ -112,6 +116,7 @@ const EmailGeneratePage = () => {
             value={subject}
             onChange={handleSubjectChange}
             toolbarId='toolbar-subject'
+            isSubmitted={isSubmitted}
           />
         </div>
 
@@ -129,6 +134,7 @@ const EmailGeneratePage = () => {
             value={email}
             onChange={handleEmailChange}
             toolbarId='toolbar-body'
+            isSubmitted={isSubmitted}
           />
         </div>
       </div>
