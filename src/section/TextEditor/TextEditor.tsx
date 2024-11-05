@@ -251,7 +251,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
       {/* <style>{customStyles}</style> */}
       <div
         id={toolbarId}
-        className='!border-none'
+        className='!hidden !border-none'
       >
         <CustomToolbar toolbarId={toolbarId} />
       </div>
@@ -271,7 +271,7 @@ const TextEditor: React.FC<TextEditorProps> = ({
           value={value}
           onChange={onChange}
           modules={modules}
-          className='editor !border-0 px-2 pb-4'
+          className='editor !border-0 p-2 md:p-4'
         />
       ) : (
         <Typography

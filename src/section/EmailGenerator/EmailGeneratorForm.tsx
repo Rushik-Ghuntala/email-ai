@@ -46,7 +46,7 @@ const EmailGeneratorForm: React.FC<EmailGeneratorFormProps> = ({
   }
 
   return (
-    <div className='mx-auto space-y-6 p-10'>
+    <div className='mx-auto space-y-6 px-6 pb-6 pt-10 md:px-10'>
       <div className='space-y-4'>
         {/* From Name Field */}
         <div className='space-y-2'>
@@ -116,7 +116,7 @@ const EmailGeneratorForm: React.FC<EmailGeneratorFormProps> = ({
         </div>
 
         {/* Submit Button */}
-        <div className='flex items-center justify-center py-8'>
+        <div className='flex items-center justify-center pt-8'>
           <CustomButton
             type='button'
             onClick={() => {

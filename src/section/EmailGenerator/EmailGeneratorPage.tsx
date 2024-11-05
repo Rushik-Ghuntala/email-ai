@@ -93,8 +93,8 @@ const EmailGeneratePage = () => {
   const { handleSubmit, isSubmitting, isValid } = formik
 
   return (
-    <div className='flex items-start'>
-      <div className='h-screen w-1/2'>
+    <div className='flex flex-col items-start lg:flex-row'>
+      <div className='h-auto w-full lg:w-1/2'>
         <FormikProvider value={formik}>
           <EmailGeneratorForm
             handleSubmit={handleSubmit}
@@ -104,7 +104,7 @@ const EmailGeneratePage = () => {
         </FormikProvider>
       </div>
 
-      <div className='mx-auto h-screen w-1/2 space-y-4 p-10'>
+      <div className='mx-auto h-auto w-full space-y-4 px-6 py-10 md:px-10 lg:w-1/2'>
         <div className='mb-8'>
           <div className='flex items-center justify-between'>
             <Typography
