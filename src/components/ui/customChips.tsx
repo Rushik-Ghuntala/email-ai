@@ -82,8 +82,8 @@ export const CustomChips = ({
             className={clsx(
               'cursor-pointer rounded-full border px-6 py-2 transition-colors duration-300',
               selectedItems.includes(item)
-                ? 'bg-gradient-to-r from-[#1A73E8] to-[#6BB7F6] text-white'
-                : 'border-transparent bg-gradient-to-r from-[#FFFFFF] to-[#F1F5F9] ring-1 ring-[#1A73E8] hover:bg-gradient-to-r hover:from-[#F1F5F9] hover:to-[#FFFFFF] hover:ring-2' // Gradient for unselected
+                ? 'bg-gradient-to-r from-[#1A73E8] to-[#6BB7F6] text-white ring-2 ring-[#1A73E8]'
+                : 'border-transparent bg-gradient-to-r from-[#FFFFFF] to-[#F1F5F9] ring-2 ring-[#1A73E8] hover:bg-gradient-to-r hover:from-[#F1F5F9] hover:to-[#FFFFFF] hover:ring-2' // Gradient for unselected
             )}
             onClick={() => handleItemClick(item)}
           >

@@ -5,6 +5,7 @@ import ReactQuill from 'react-quill-new'
 import 'react-quill/dist/quill.snow.css'
 import { Loader2 } from 'lucide-react'
 import { AnimatePresence, motion, Variants } from 'framer-motion'
+import Typography from '@/components/Typography'
 
 interface TextEditorProps {
   value: string
@@ -17,8 +18,9 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
   const isSubject = toolbarId === 'toolbar-subject'
 
   return (
-    <div className='extra-work ql-toolbar ql-snow flex items-center space-x-1 px-4 py-2'>
-      <select className='ql-font focus:outline-none'>
+    <div>
+      {/* <div className='extra-work ql-toolbar ql-snow flex items-center space-x-1 px-4 py-2'> */}
+      {/* <select className='ql-font focus:outline-none'>
         <option value='sans-serif'>Sans Serif</option>
         <option value='serif'>Serif</option>
         <option value='monospace'>Monospace</option>
@@ -33,20 +35,20 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
         <option value='huge'>Huge</option>
       </select>
 
-      <div className='mx-2 h-5 border-l border-gray-300' />
+      <div className='mx-2 h-5 border-l border-gray-300' /> */}
 
-      <button className='ql-bold focus:outline-none' />
+      {/* <button className='ql-bold focus:outline-none' />
       <button className='ql-italic focus:outline-none' />
-      <button className='ql-underline focus:outline-none' />
+      <button className='ql-underline focus:outline-none' /> */}
 
       {!isSubject && (
         <>
-          <button className='ql-strike focus:outline-none' />
+          {/* <button className='ql-strike focus:outline-none' /> */}
 
-          <div className='mx-2 h-5 border-l border-gray-300' />
+          {/* <div className='mx-2 h-5 border-l border-gray-300' /> */}
 
-          <select className='ql-color focus:outline-none'></select>
-          <div className='mx-2 h-5 border-l border-gray-300' />
+          {/* <select className='ql-color focus:outline-none'></select> */}
+          {/* <div className='mx-2 h-5 border-l border-gray-300' />
 
           <button
             className='ql-align'
@@ -73,12 +75,12 @@ const CustomToolbar: React.FC<{ toolbarId: string }> = ({ toolbarId }) => {
           <button
             className='ql-list focus:outline-none'
             value='bullet'
-          />
+          /> */}
 
-          <div className='mx-2 h-5 border-l border-gray-300' />
+          {/* <div className='mx-2 h-5 border-l border-gray-300' /> */}
 
-          <button className='ql-link focus:outline-none' />
-          <button className='ql-image focus:outline-none' />
+          {/* <button className='ql-link focus:outline-none' />
+          <button className='ql-image focus:outline-none' /> */}
         </>
       )}
     </div>
@@ -245,9 +247,12 @@ const TextEditor: React.FC<TextEditorProps> = ({
   `
 
   return (
-    <div className='text-editor rounded-b-xl bg-gradient-to-r from-white to-gray-50 shadow-md ring-1 ring-[#1A73E8] transition-all duration-300 hover:bg-gradient-to-r hover:from-gray-50 hover:to-white hover:shadow-lg hover:ring-[#1A73E8] focus:ring-2 focus:ring-[#1A73E8] focus-visible:outline-none'>
-      <style>{customStyles}</style>
-      <div id={toolbarId}>
+    <div className='text-editor rounded-xl bg-gradient-to-r from-white to-gray-50 shadow-md ring-2 ring-[#1A73E8] transition-all duration-300 hover:bg-gradient-to-r hover:from-gray-50 hover:to-white hover:shadow-lg hover:ring-[#1A73E8] focus:ring-2 focus:ring-[#1A73E8] focus-visible:outline-none'>
+      {/* <style>{customStyles}</style> */}
+      <div
+        id={toolbarId}
+        className='!border-none'
+      >
         <CustomToolbar toolbarId={toolbarId} />
       </div>
       {isSubmitted ? (
@@ -260,14 +265,23 @@ const TextEditor: React.FC<TextEditorProps> = ({
             animateOnLoad={true}
           />
         </div>
-      ) : (
+      ) : value ? (
         <ReactQuill
           theme='snow'
           value={value}
           onChange={onChange}
           modules={modules}
-          className='editor !border-0'
+          className='editor !border-0 px-2 pb-4'
         />
+      ) : (
+        <Typography
+          color='text-gray-500'
+          className='cursor-not-allowed p-4'
+        >
+          {toolbarId === 'toolbar-subject'
+            ? 'Generated Subject will appear here...'
+            : 'Generated Email Content will appear here...'}
+        </Typography>
       )}
     </div>
   )

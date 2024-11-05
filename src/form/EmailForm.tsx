@@ -9,6 +9,8 @@ import toast from 'react-hot-toast'
 import he from 'he'
 import { useStateSelector } from '@/store/root.reducer'
 import { RootState } from '@/store/redux.types'
+import { toFormikValidationSchema } from 'zod-formik-adapter'
+import { sendEmailFormSchema } from '@/utils/validations'
 
 export interface EmailFormProps {
   onSave: () => void
@@ -42,12 +44,12 @@ const EmailForm: React.FC<EmailFormProps> = ({
     isSubmitting,
   } = useFormik({
     initialValues: {
-      // senderEmail: '',
+      senderEmail: user?.email || '',
       receiverEmail: '',
       subject: subject || '',
       content: content || '',
     },
-    validationSchema: null, // You can add a validation schema if needed
+    validationSchema: toFormikValidationSchema(sendEmailFormSchema), // You can add a validation schema if needed
     onSubmit: async (values) => {
       // try {
       //   console.log('Submit-----------------------')
@@ -135,7 +137,7 @@ const EmailForm: React.FC<EmailFormProps> = ({
           onSubmit={handleSubmit}
           method='POST'
         >
-          {/* <div className='space-y-2'>
+          <div className='space-y-2'>
             <Typography className='font-medium'>Sender Email</Typography>
             <InputField
               id='senderEmail'
@@ -146,11 +148,12 @@ const EmailForm: React.FC<EmailFormProps> = ({
               onChange={(e) => handleChange('senderEmail', e.target.value)}
               onBlur={() => handleOnBlur('senderEmail')}
               className='w-full'
+              disabled
             />
             {errors.senderEmail && touched.senderEmail && (
               <div className='text-red-500'>{errors.senderEmail}</div>
             )}
-          </div> */}
+          </div>
 
           <div className='space-y-2'>
             <Typography className='font-medium'>Receiver Email</Typography>

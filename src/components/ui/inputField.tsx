@@ -7,7 +7,7 @@ export const InputField = extendVariants(Input, {
       primaryBordered: {
         inputWrapper: [
           'rounded-[12px] shadow-md px-4 py-3 transition-all duration-300',
-          'ring-1 ring-[#1A73E8] bg-gradient-to-r from-white to-gray-50',
+          'ring-2 ring-[#1A73E8] bg-gradient-to-r from-white to-gray-50',
           'hover:ring-[#1A73E8] hover:shadow-lg hover:bg-gradient-to-r hover:from-gray-50 hover:to-white',
           'focus:ring-2 focus:ring-[#1A73E8] focus-visible:outline-none',
         ],
