@@ -10,6 +10,7 @@ import dynamic from 'next/dynamic'
 import Typography from '@/components/Typography'
 import EmailForm from '@/form/EmailForm'
 import CustomButton from '@/components/ui/customButton'
+import CopyButton from '@/components/CopyButton'
 
 // Dynamic import for TextEditor
 const TextEditor = dynamic(() => import('../TextEditor/TextEditor'), {
@@ -105,13 +106,19 @@ const EmailGeneratePage = () => {
 
       <div className='mx-auto h-screen w-1/2 space-y-4 p-10'>
         <div className='mb-8'>
-          <Typography
-            size='xl'
-            weight='semibold'
-            className='mb-3'
-          >
-            Subject:
-          </Typography>
+          <div className='flex items-center justify-between'>
+            <Typography
+              size='xl'
+              weight='semibold'
+              className='mb-3'
+            >
+              Subject:
+            </Typography>
+            <CopyButton
+              content={subject}
+              disabled={!subject}
+            />
+          </div>
           <TextEditor
             value={subject}
             onChange={setSubject}
@@ -120,14 +127,20 @@ const EmailGeneratePage = () => {
           />
         </div>
 
-        <div>
-          <Typography
-            size='xl'
-            weight='semibold'
-            className='mb-3'
-          >
-            Email Body:
-          </Typography>
+        <div className='mb-8'>
+          <div className='flex items-center justify-between'>
+            <Typography
+              size='xl'
+              weight='semibold'
+              className='mb-3'
+            >
+              Email Body:
+            </Typography>
+            <CopyButton
+              content={email}
+              disabled={!email}
+            />
+          </div>
           <TextEditor
             value={email}
             onChange={setEmail}
@@ -136,9 +149,14 @@ const EmailGeneratePage = () => {
           />
         </div>
 
-        <CustomButton onClick={handleInformationProfileButtonClick}>
-          Send Email
-        </CustomButton>
+        <div className='flex items-center justify-center py-8'>
+          <CustomButton
+            onClick={handleInformationProfileButtonClick}
+            disabled={!subject || !email}
+          >
+            Send Email
+          </CustomButton>
+        </div>
       </div>
 
       {emailForm && (

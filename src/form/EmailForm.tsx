@@ -7,6 +7,8 @@ import { useFormik } from 'formik'
 import React from 'react'
 import toast from 'react-hot-toast'
 import he from 'he'
+import { useStateSelector } from '@/store/root.reducer'
+import { RootState } from '@/store/redux.types'
 
 export interface EmailFormProps {
   onSave: () => void
@@ -26,6 +28,8 @@ const EmailForm: React.FC<EmailFormProps> = ({
   subject,
   content,
 }) => {
+  const user = useStateSelector((state: RootState) => state.user.user) // Fetch user data from Redux
+
   const {
     values,
     touched,
@@ -38,44 +42,77 @@ const EmailForm: React.FC<EmailFormProps> = ({
     isSubmitting,
   } = useFormik({
     initialValues: {
-      senderEmail: '',
+      // senderEmail: '',
       receiverEmail: '',
       subject: subject || '',
       content: content || '',
     },
     validationSchema: null, // You can add a validation schema if needed
     onSubmit: async (values) => {
-      try {
-        console.log('aavooooo')
-        console.log('values', values)
-        // Sanitize the subject to remove HTML tags
-        const sanitizedSubject = stripHtmlTags(values.subject)
-        console.log('sanitizedSubject', sanitizedSubject)
-        const response = await fetch('/api/sendEmail', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            ...values,
-            subject: sanitizedSubject, // Use sanitized subject
-          }),
-        })
+      // try {
+      //   console.log('Submit-----------------------')
+      //   const payload = {
+      //     senderEmail: values.senderEmail,
+      //     receiverEmail: values.receiverEmail,
+      //     subject: stripHtmlTags(values.subject),
+      //     content: values.content,
+      //   }
 
-        console.log('res', response)
+      //   console.log('payload', payload)
 
-        const data = await response.json()
+      //   const response = await fetch('/api/sendEmail', {
+      //     method: 'POST',
+      //     headers: { 'Content-Type': 'application/json' },
+      //     body: JSON.stringify(payload),
+      //   })
 
-        console.log('data', data)
-        if (response.ok) {
-          toast.success('Email sent successfully!')
-          onSave()
-        } else {
-          setErrors({ content: data.message })
-          toast.error(data.message || 'Failed to send email')
-        }
-      } catch (error) {
-        console.error('Error sending email:', error)
-        toast.error('An error occurred while sending the email')
-      }
+      //   console.log('Response status:', response.status)
+
+      //   const data = await response.json()
+      //   console.log('Response data:', data)
+
+      //   if (response.ok) {
+      //     toast.success(data.message || 'Email sent successfully!')
+      //     onSave()
+      //   } else {
+      //     toast.error(data.error || 'Failed to send email')
+      //   }
+      // } catch (error) {
+      //   console.error('Error sending email:', error)
+      //   toast.error('An error occurred while sending the email')
+      // }
+      // Encode the subject by removing HTML tags and then encoding it
+      const subjectText = subject
+        .replace(/<strong>(.*?)<\/strong>/g, '$1') // Remove <strong> tags
+        .replace(/<em>(.*?)<\/em>/g, '$1') // Remove <em> tags
+        .replace(/<u>(.*?)<\/u>/g, '$1') // Remove <u> tags
+        .replace(/<br\s*\/?>/g, '') // Convert <br> tags to newlines
+        .replace(/<p>/g, '') // Remove <p> tags
+        .replace(/<\/p>/g, '\n') // Replace closing <p> with newlines
+        .replace(/<span[^>]*>|<\/span>/g, '') // Remove <span> tags
+
+      const subjectEncoded = encodeURIComponent(subjectText.trim())
+
+      // Remove HTML tags from the email body and preserve formatting
+      const bodyText = content
+        .replace(/<p>/g, '') // Remove <p> tags
+        .replace(/<\/p>/g, '\n') // Replace closing <p> with newlines
+        .replace(/<strong>(.*?)<\/strong>/g, '$1') // Remove <strong> tags
+        .replace(/<em>(.*?)<\/em>/g, '$1') // Remove <em> tags
+        .replace(/<u>(.*?)<\/u>/g, '$1') // Remove <u> tags
+        .replace(/<br\s*\/?>/g, '\n') // Convert <br> tags to newlines
+        .replace(/<li>(.*?)<\/li>/g, '- $1\n') // Convert <li> to bullet points
+        .replace(/<ol>(.*?)<\/ol>/g, '$1') // Remove <ol> tags
+        .replace(/<span[^>]*>|<\/span>/g, '') // Remove <span> tags
+
+      // Encode the plain text body
+      const bodyEncoded = encodeURIComponent(bodyText.trim())
+
+      // Construct the Gmail compose URL with encoded subject and body
+      const gmailComposeUrl = `https://mail.google.com/mail/?view=cm&fs=1&to=${encodeURIComponent(values.receiverEmail)}&su=${subjectEncoded}&body=${bodyEncoded}`
+
+      // Open the Gmail compose URL in a new tab
+      window.open(gmailComposeUrl, '_blank')
     },
     validateOnMount: true,
   })
@@ -98,7 +135,7 @@ const EmailForm: React.FC<EmailFormProps> = ({
           onSubmit={handleSubmit}
           method='POST'
         >
-          <div className='space-y-2'>
+          {/* <div className='space-y-2'>
             <Typography className='font-medium'>Sender Email</Typography>
             <InputField
               id='senderEmail'
@@ -113,7 +150,7 @@ const EmailForm: React.FC<EmailFormProps> = ({
             {errors.senderEmail && touched.senderEmail && (
               <div className='text-red-500'>{errors.senderEmail}</div>
             )}
-          </div>
+          </div> */}
 
           <div className='space-y-2'>
             <Typography className='font-medium'>Receiver Email</Typography>
