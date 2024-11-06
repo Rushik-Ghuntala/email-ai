@@ -22,6 +22,7 @@ export interface EmailGeneratorFormValues {
   toName: string
   emailPrompt: string
   tone: string[]
+  size: string
 }
 
 const EmailGeneratePage = () => {
@@ -56,6 +57,7 @@ const EmailGeneratePage = () => {
       toName: '',
       emailPrompt: '',
       tone: [],
+      size: '',
     },
     validationSchema: toFormikValidationSchema(emailFormValidationSchema),
     onSubmit: async (values) => {
@@ -66,6 +68,7 @@ const EmailGeneratePage = () => {
           toName: values.toName,
           emailPrompt: values.emailPrompt,
           tone: values.tone,
+          size: values.size,
         }
 
         const response = await fetch('/api/emailGenerating', {

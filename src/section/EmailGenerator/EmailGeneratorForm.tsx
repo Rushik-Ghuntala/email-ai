@@ -9,6 +9,7 @@ import React from 'react'
 import CustomButton from '@/components/ui/customButton'
 import { imageConfig } from '@/constant/imageConfig'
 import { EmailGeneratorFormValues } from './EmailGeneratorPage'
+import { SingleCustomChips } from '@/components/ui/singleCustomChips'
 
 interface EmailGeneratorFormProps {
   handleSubmit: () => void
@@ -32,17 +33,27 @@ const EmailGeneratorForm: React.FC<EmailGeneratorFormProps> = ({
     { label: 'Urgent', value: 'urgent' },
   ]
 
+  const sizeOptions = [
+    { label: 'Short', value: 'short' },
+    { label: 'Medium', value: 'medium' },
+    { label: 'Large', value: 'large' },
+  ]
+
   const handleChange = (field: string, value: any) => {
     setFieldValue(field, value)
   }
 
   const handleToneChange = (selectedTone: string) => {
-    const currentTones = values.tone
+    const currentTones = values.tone || []
     const newTones = currentTones.includes(selectedTone)
       ? currentTones.filter((tone) => tone !== selectedTone)
       : [...currentTones, selectedTone]
 
-    handleChange('tone', newTones)
+    handleChange('tone', newTones) // Update Formik state with the new tones array
+  }
+
+  const handleSizeChange = (selectedSize: string) => {
+    handleChange('size', selectedSize)
   }
 
   return (
@@ -112,6 +123,25 @@ const EmailGeneratorForm: React.FC<EmailGeneratorFormProps> = ({
           />
           {errors.tone && touched.tone && (
             <div className='text-red-500'>{errors.tone}</div>
+          )}
+        </div>
+
+        {/* Size of Mail Selection with CustomChips */}
+        <div>
+          <Typography className='font-medium'>Size of Mail</Typography>
+          <SingleCustomChips
+            id='size'
+            data={sizeOptions.map((option) => option.label)}
+            name='size'
+            onSelect={(name, item) =>
+              handleSizeChange(
+                sizeOptions.find((size) => size.label === item)?.value || ''
+              )
+            }
+            selected={values.size}
+          />
+          {errors.size && touched.size && (
+            <div className='text-red-500'>{errors.size}</div>
           )}
         </div>
 

@@ -3,17 +3,37 @@ import Together from 'together-ai'
 
 const together = new Together({ apiKey: process.env.TOGETHER_API_KEY })
 
+// Define email size configurations
+const EMAIL_SIZES = {
+  short: { minSentences: 3, maxSentences: 5 },
+  medium: { minSentences: 5, maxSentences: 8 },
+  large: { minSentences: 8, maxSentences: 10 },
+}
+
+type EmailSize = 'short' | 'medium' | 'large'
+
 export async function POST(request: Request) {
   try {
-    const { userName, toName, emailPrompt, tone } = await request.json()
+    const { userName, toName, emailPrompt, tone, size } = await request.json()
 
     // Validate input
-    if (!userName || !toName || !emailPrompt || !tone) {
+    if (!userName || !toName || !emailPrompt || !tone || !size) {
       return NextResponse.json(
-        { error: 'All fields are required.' },
+        { error: 'All fields including size are required.' },
         { status: 400 }
       )
     }
+
+    // Validate size value
+    if (!['short', 'medium', 'large'].includes(size)) {
+      return NextResponse.json(
+        { error: 'Size must be either "short", "medium", or "large".' },
+        { status: 400 }
+      )
+    }
+
+    // Get sentence range for specified size
+    const { minSentences, maxSentences } = EMAIL_SIZES[size as EmailSize]
 
     // Construct a detailed prompt for better email generation
     const structuredPrompt = `
@@ -24,14 +44,16 @@ CONTEXT:
 - To: ${toName}
 - Purpose: ${emailPrompt}
 - Tone: ${tone}
+- Length: ${size} (${minSentences}-${maxSentences} sentences)
 
 REQUIREMENTS:
 1. Start with a compelling subject line that is professional and attention-grabbing
-2. Include at least 6 well-structured sentences
+2. Include ${minSentences}-${maxSentences} well-structured sentences
 3. Follow proper business email format with greeting and signature
 4. Maintain the specified ${tone} tone throughout
 5. Include clear call-to-action if applicable
 6. End with a professional closing
+7. Keep the email length appropriate for a ${size} email
 
 FORMAT YOUR RESPONSE AS:
 Subject: [Your subject line here]
@@ -43,8 +65,9 @@ Please ensure the email is:
 - Grammatically correct
 - Professional yet engaging
 - Easy to read with proper paragraphing
-- Contains at least 6 sentences
+- Contains ${minSentences}-${maxSentences} sentences
 - Maintains consistent tone
+- Appropriate length for a ${size} email
 
 Generate the email now:`
 
@@ -54,7 +77,7 @@ Generate the email now:`
         {
           role: 'system',
           content:
-            'You are a professional email writing assistant. You excel at crafting clear, effective, and well-structured business emails that achieve their intended purpose while maintaining appropriate tone and professionalism.',
+            'You are a professional email writing assistant. You excel at crafting clear, effective, and well-structured business emails that achieve their intended purpose while maintaining appropriate tone and professionalism. You can adapt your writing to different length requirements while maintaining quality and impact.',
         },
         {
           role: 'user',
@@ -82,6 +105,7 @@ Generate the email now:`
     return NextResponse.json({
       success: true,
       email: emailParts,
+      size: size, // Include size in response for reference
     })
   } catch (error: any) {
     console.error(
